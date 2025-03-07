@@ -1,94 +1,107 @@
 import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { FormsModule } from '@angular/forms';
-import { ProductoComponent } from "./pages/producto/producto.component";
+import { Firestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from '@angular/fire/firestore';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet, FormsModule, ProductoComponent, CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css']
 })
 export class AppComponent {
   title = 'ejemplo3';
+  producto = { id: 0, descripcion: '', precio: 0 }; // Objeto para el formulario
+  productos: any[] = []; // Lista de productos
 
-  //productos
-  producto = {
-    id: 0,
-    descripcion: '',
-    precio: 0
-  };
+  constructor(private firestore: Firestore) {
+    this.cargarProductos(); // Cargar productos al iniciar
+  }
 
-  productos = [
-    {id: 1, descripcion: 'coquita', precio: 22.50},
-    {id: 2, descripcion: 'nachos', precio: 27.70},
-    {id: 3, descripcion: 'pepsi', precio: 21.00},
-    {id: 4, descripcion: 'chocolate', precio: 14.90},
-    {id: 5, descripcion: 'hamburgues', precio: 52.50},
-  ];
+  // Cargar productos desde Firebase
+  async cargarProductos() {
+    try {
+      // Obtener todos los documentos de la colección "productos"
+      const querySnapshot = await getDocs(collection(this.firestore, 'productos'));
+  
+      // Mapear los documentos a un array de productos
+      this.productos = querySnapshot.docs.map(doc => doc.data());
+    } catch (error) {
+      console.error('Error al cargar los productos:', error);
+      alert('Hubo un error al cargar los productos');
+    }
+  }
 
-  //funcion para agregar un producto al arreglo
-  agreProducto(){
-    //validamos que el id no sea 0
-    if(this.producto.id == 0){
-      alert('el ID debe ser diferente de CERO');
+  // Agregar un producto a Firebase
+  async agreProducto() {
+    if (this.producto.id === 0) {
+      alert('El ID debe ser diferente de CERO');
       return;
     }
-    //verificar que el ID no se repita
-    for(let i = 0; i < this.productos.length; i++){
-      if(this.producto.id == this.productos[i].id){
-        alert('ya existe un producto con este ID');
-        return;
-      }
+
+    // Verificar si el ID ya existe
+    const existe = this.productos.some(prod => prod.id === this.producto.id);
+    if (existe) {
+      alert('Ya existe un producto con este ID');
+      return;
     }
 
-    //agregamos el producto al arreglo
-    this.productos.push({
-      id: this.producto.id,
-      descripcion: this.producto.descripcion,
-      precio: this.producto.precio
-    });
+    try {
+      await addDoc(collection(this.firestore, 'productos'), {
+        id: this.producto.id,
+        descripcion: this.producto.descripcion,
+        precio: this.producto.precio
+      });
 
-    //reiniciamos el objeto producto a sus valores iniciales
-    this.producto.id = 0;
-    this.producto.descripcion = '';
-    this.producto.precio = 0;
-  }
-
-  //funcion para seleccionar un producto existente
-  selecProducto(productoseleccionado: { id: number; descripcion: string; precio: number }){
-    this.producto.id = productoseleccionado.id;
-    this.producto.descripcion = productoseleccionado.descripcion;
-    this.producto.precio = productoseleccionado.precio;
-  }
-
-  //funcion para modificar el producto
-  modiProducto(){
-    for(let i = 0; i < this.productos.length; i++){
-      if(this.producto.id == this.productos[i].id){
-        this.productos[i].descripcion = this.producto.descripcion;
-        this.productos[i].precio = this.producto.precio;
-
-        //reseteamos el objeto producto
-        this.producto.id = 0;
-        this.producto.descripcion = '';
-        this.producto.precio = 0;
-        return;
-      }
+      await this.cargarProductos(); // Recargar la lista de productos
+      this.producto = { id: 0, descripcion: '', precio: 0 }; // Limpiar el formulario
+      alert('Producto agregado correctamente');
+    } catch (error) {
+      console.error('Error al agregar el producto:', error);
+      alert('Hubo un error al agregar el producto');
     }
-
-    alert('No existe este ID'); //este mensaje es en caso de que no exista en nuestra tabla
   }
 
-  //funcion para eliminar un producto del arreglo
-  eliminarProd(id: number){
-    for(let i = 0; i < this.productos.length; i++){
-      if(id == this.productos[i].id){
-        this.productos.splice(i, 1);
-        return;
-      }
+  // Seleccionar un producto para editarlo
+  selecProducto(producto: any) {
+    this.producto = { ...producto }; // Copiar el producto seleccionado al formulario
+  }
+
+  // Eliminar un producto de Firebase
+  async eliminarProd(id: number) {
+    try {
+      // Obtener la referencia al documento que se va a eliminar
+      const productoRef = doc(this.firestore, 'productos', id.toString());
+  
+      // Eliminar el documento de Firebase
+      await deleteDoc(productoRef);
+  
+      // Recargar la lista de productos después de eliminar
+      await this.cargarProductos();
+  
+      alert('Producto eliminado correctamente');
+    } catch (error) {
+      console.error('Error al eliminar el producto:', error);
+      alert('Hubo un error al eliminar el producto');
+    }
+  }
+
+  // Modificar un producto en Firebase
+  async modiProducto() {
+    try {
+      const productoRef = doc(this.firestore, 'productos', this.producto.id.toString());
+      await updateDoc(productoRef, {
+        descripcion: this.producto.descripcion,
+        precio: this.producto.precio
+      });
+
+      await this.cargarProductos(); // Recargar la lista de productos
+      this.producto = { id: 0, descripcion: '', precio: 0 }; // Limpiar el formulario
+      alert('Producto modificado correctamente');
+    } catch (error) {
+      console.error('Error al modificar el producto:', error);
+      alert('Hubo un error al modificar el producto');
     }
   }
 }

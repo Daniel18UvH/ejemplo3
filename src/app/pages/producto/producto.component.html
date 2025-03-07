@@ -5,22 +5,22 @@
     <form (submit)="insertProducto()">
       <div class="form-group">
         <label for="marca">Marca:</label>
-        <input type="text" id="marca" [(ngModel)]="libro.marca" name="marca" required>
+        <input type="text" id="marca" [(ngModel)]="productos.marca" name="marca" required>
       </div>
   
       <div class="form-group">
         <label for="nombre">Nombre:</label>
-        <input type="text" id="nombre" [(ngModel)]="libro.nombre" name="nombre" required>
+        <input type="text" id="nombre" [(ngModel)]="productos.nombre" name="nombre" required>
       </div>
   
       <div class="form-group">
         <label for="caducidad">Caducidad:</label>
-        <input type="date" id="caducidad" [(ngModel)]="libro.caducidad" name="caducidad" required>
+        <input type="date" id="caducidad" [(ngModel)]="productos.caducidad" name="caducidad" required>
       </div>
   
       <div class="form-group">
         <label for="cantidad">Cantidad:</label>
-        <input type="number" id="cantidad" [(ngModel)]="libro.cantidad" name="cantidad" required>
+        <input type="number" id="cantidad" [(ngModel)]="productos.cantidad" name="cantidad" required>
       </div>
   
       <div class="form-actions">
