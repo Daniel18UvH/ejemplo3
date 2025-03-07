@@ -1,0 +1,58 @@
+<div class="container">
+    <h1>Gestión de Productos</h1>
+  
+    <!-- Formulario para agregar/editar productos -->
+    <form (submit)="insertProducto()">
+      <div class="form-group">
+        <label for="marca">Marca:</label>
+        <input type="text" id="marca" [(ngModel)]="libro.marca" name="marca" required>
+      </div>
+  
+      <div class="form-group">
+        <label for="nombre">Nombre:</label>
+        <input type="text" id="nombre" [(ngModel)]="libro.nombre" name="nombre" required>
+      </div>
+  
+      <div class="form-group">
+        <label for="caducidad">Caducidad:</label>
+        <input type="date" id="caducidad" [(ngModel)]="libro.caducidad" name="caducidad" required>
+      </div>
+  
+      <div class="form-group">
+        <label for="cantidad">Cantidad:</label>
+        <input type="number" id="cantidad" [(ngModel)]="libro.cantidad" name="cantidad" required>
+      </div>
+  
+      <div class="form-actions">
+        <button type="submit">Agregar</button>
+        <button type="button" (click)="updateProductos()">Actualizar</button>
+        <button type="button" (click)="deleteProducto()">Eliminar</button>
+      </div>
+    </form>
+  
+    <!-- Tabla para mostrar la lista de productos -->
+    <table>
+      <thead>
+        <tr>
+          <th>Marca</th>
+          <th>Nombre</th>
+          <th>Caducidad</th>
+          <th>Cantidad</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (producto of productos; track libro.id) {
+          <tr>
+            <td>{{ producto.marca }}</td>
+            <td>{{ producto.nombre }}</td>
+            <td>{{ producto.caducidad }}</td>
+            <td>{{ producto.cantidad }}</td>
+            <td>
+              <button (click)="selectProducto(libro)">Seleccionar</button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
