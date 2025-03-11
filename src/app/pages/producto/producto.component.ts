@@ -23,7 +23,7 @@ export class ProductoComponent {
   async cargarProductos() {
     try {
       const querySnapshot = await getDocs(collection(this.firestore, 'productos'));
-      this.productos = querySnapshot.docs.map(doc => doc.data());
+      this.productos = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
     } catch (error) {
       console.error('Error al cargar los productos:', error);
       alert('Hubo un error al cargar los productos');
@@ -66,9 +66,9 @@ export class ProductoComponent {
   }
 
   // Eliminar un producto de Firebase
-  async eliminarProd(id: number) {
+  async eliminarProd(id: string) {
     try {
-      const productoRef = doc(this.firestore, 'productos', id.toString());
+      const productoRef = doc(this.firestore, 'productos', id);
       await deleteDoc(productoRef);
       await this.cargarProductos(); // Recargar la lista de productos
       alert('Producto eliminado correctamente');
